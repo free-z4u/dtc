@@ -5,10 +5,14 @@
 *.so
 *~
 *.tab.[ch]
+*.atag
+*.dtb
+*.dts
 lex.yy.c
 *.lex.c
 /dtc
 /fdtdump
+/atags
 /convert-dtsv0
 /version_gen.h
 /fdtget
