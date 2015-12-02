@@ -43,6 +43,15 @@ static int setprop_string(void *fdt, const char *node_path,
 	return fdt_setprop_string(fdt, offset, property, string);
 }
 
+static int setprop_values(void *fdt, const char *node_path,
+			  const char *property, const void *val, int len)
+{
+	int offset = node_offset(fdt, node_path);
+	if (offset < 0)
+		return offset;
+	return fdt_setprop(fdt, offset, property, val, len);
+}
+
 static int setprop_cell(void *fdt, const char *node_path,
 			const char *property, uint32_t val)
 {
@@ -183,6 +192,72 @@ int atags_to_fdt(void *atag_list, void *fdt, int total_space)
 					initrd_start);
 			setprop_cell(fdt, "/chosen", "linux,initrd-end",
 					initrd_start + initrd_size);
+		} else if (atag->hdr.tag == ATAG_BLUETOOTH) {
+			setprop_values(fdt, "/chosen", "linux,bt_mac",
+				(unsigned char *)(&atag->u), (atag->hdr.size-2)*sizeof(__u32));
+		} else if (atag->hdr.tag == ATAG_MSM_WIFI) {
+			setprop_values(fdt, "/chosen", "linux,wifi",
+				(unsigned char *)(&atag->u), (atag->hdr.size-2)*sizeof(__u32));
+		} else if (atag->hdr.tag == ATAG_MSM_AWB_CAL) {
+			setprop_values(fdt, "/chosen", "linux,awb_cal",
+				(unsigned char *)(&atag->u), (atag->hdr.size-2)*sizeof(__u32));
+		} else if (atag->hdr.tag == ATAG_MFG_GPIO_TABLE) {
+			setprop_values(fdt, "/chosen", "linux,gpio_table",
+				(unsigned char *)(&atag->u), (atag->hdr.size-2)*sizeof(__u32));
+		} else if (atag->hdr.tag == ATAG_MSM_PARTITION) {
+			setprop_values(fdt, "/chosen", "linux,msm_partitions",
+				(unsigned char *)(&atag->u), (atag->hdr.size-2)*sizeof(__u32));
+		} else if (atag->hdr.tag == ATAG_MEM_RESERVED) {
+			setprop_values(fdt, "/chosen", "linux,mem_reserved",
+				(unsigned char *)(&atag->u), (atag->hdr.size-2)*sizeof(__u32));
+		} else if (atag->hdr.tag == ATAG_TP) {
+			setprop_values(fdt, "/chosen", "linux,tp",
+				(unsigned char *)(&atag->u), (atag->hdr.size-2)*sizeof(__u32));
+		} else if (atag->hdr.tag == ATAG_MEMSIZE) {
+			setprop_cell(fdt, "/chosen", "linux,memsize",
+					atag->u.revision.rev);
+		} else if (atag->hdr.tag == ATAG_ALS) {
+			setprop_cell(fdt, "/chosen", "linux,als_calibration",
+					atag->u.als_kadc.kadc);
+		} else if (atag->hdr.tag == ATAG_ENGINEERID) {
+			setprop_cell(fdt, "/chosen", "linux,engineerid",
+					atag->u.revision.rev);
+		} else if (atag->hdr.tag == ATAG_SMI) {
+			setprop_cell(fdt, "/chosen", "linux,smi",
+					atag->u.mem.size);
+		} else if (atag->hdr.tag == ATAG_HWID) {
+			setprop_cell(fdt, "/chosen", "linux,hwid",
+					atag->u.revision.rev);
+		} else if (atag->hdr.tag == ATAG_SKUID) {
+			setprop_cell(fdt, "/chosen", "linux,skuid",
+					atag->u.revision.rev);
+		} else if (atag->hdr.tag == ATAG_HERO_PANEL_TYPE) {
+			setprop_cell(fdt, "/chosen", "linux,panel_type",
+					atag->u.revision.rev);
+		} else if (atag->hdr.tag == ATAG_GS) {
+			setprop_cell(fdt, "/chosen", "linux,gs_calibration",
+					atag->u.revision.rev);
+		} else if (atag->hdr.tag == ATAG_PCBID) {
+			setprop_cell(fdt, "/chosen", "linux,pcbid",
+					atag->u.revision.rev);
+		} else if (atag->hdr.tag == ATAG_REVISION) {
+			__u32 revision[2];
+			revision[0] = cpu_to_fdt32(atag->u.revision.rev);
+			revision[1] = cpu_to_fdt32(atag->u.revision.rev);
+			if (atag->hdr.size > 3) {
+				revision[1] = cpu_to_fdt32(atag->u.revision.rev2);
+			}
+			setprop_values(fdt, "/chosen", "linux,revision",
+					revision, sizeof(revision));
+		} else if (atag->hdr.tag == ATAG_PS) {
+			__u32 ps_settings[2];
+			ps_settings[0] = cpu_to_fdt32(atag->u.serialnr.low);
+			ps_settings[1] = cpu_to_fdt32(atag->u.serialnr.high);
+			setprop_values(fdt, "/chosen", "linux,ps_calibration",
+					ps_settings, sizeof(ps_settings));
+		} else if (atag->hdr.tag == ATAG_CORE) {
+			if(atag->hdr.size > 2)
+				printf("we have some boot info?\n");
 		} else {
 			printf("unknow tag: %06x\n", atag->hdr.tag);
 		}

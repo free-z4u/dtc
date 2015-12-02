@@ -178,6 +178,13 @@ struct tag_als_kadc {
 #define ATAG_MSM_AWB_CAL	0x59504550
  /* MSM WiFi */
 #define ATAG_MSM_WIFI		0x57494649
+#define ATAG_MFG_GPIO_TABLE 0x59504551
+#define ATAG_BLUETOOTH		0x43294329
+#define ATAG_PS				0x5441001c
+#define ATAG_GS				0x5441001d
+#define ATAG_MEMSIZE		0x5441001e
+#define ATAG_TP				0x41387898
+
 struct tag_microp_version {
 	char ver[4];
 };
