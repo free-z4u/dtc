@@ -255,6 +255,9 @@ int atags_to_fdt(void *atag_list, void *fdt, int total_space)
 			ps_settings[1] = cpu_to_fdt32(atag->u.serialnr.high);
 			setprop_values(fdt, "/chosen", "linux,ps_calibration",
 					ps_settings, sizeof(ps_settings));
+		} else if (atag->hdr.tag == ATAG_PS_TYPE) {
+			setprop_cell(fdt, "/chosen", "linux,ps_type",
+					atag->u.revision.rev);
 		} else if (atag->hdr.tag == ATAG_CORE) {
 			if(atag->hdr.size > 2)
 				printf("we have some boot info?\n");
@@ -316,12 +319,16 @@ void * read_file(char * name, size_t* size) {
 
 int main(int argc, char *argv[])
 {
+	if (argc < 3) {
+		printf("use %s ace.atags ace.dtb ace-new.dtb\n", argv[0]);
+		return 0;
+	}
 	size_t atag_size = 0;
-	char * atag = read_file("ace.atag", &atag_size);
+	char * atag = read_file(argv[1], &atag_size);
 	if (!atag)
 		return 0;
 	size_t fdt_size = 0;
-	char * fdt = read_file("ace.dtb", &fdt_size);
+	char * fdt = read_file(argv[2], &fdt_size);
 	if (!fdt)
 		return 0;
 	fdt = realloc(fdt, fdt_size + atag_size * 2);
@@ -329,5 +336,5 @@ int main(int argc, char *argv[])
 		printf("can't update fdt\n");
 		return 0;
 	}
-	write_file("ace-new.dtb", fdt, fdt_size + atag_size * 2);
+	write_file(argv[3], fdt, fdt_size + atag_size * 2);
 }
